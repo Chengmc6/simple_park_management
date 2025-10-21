@@ -33,7 +33,7 @@ import jakarta.validation.Valid;
  * @since 2025-10-15
  */
 @RestController
-@RequestMapping("/car")
+@RequestMapping("/park/car")
 public class CarController {
 
     @Autowired

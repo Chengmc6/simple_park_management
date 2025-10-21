@@ -22,7 +22,7 @@ import com.example.park.domain.service.ICarUsageService;
  * @since 2025-10-15
  */
 @RestController
-@RequestMapping("/car-usage")
+@RequestMapping("/park/car-usage")
 public class CarUsageController {
 
     @Autowired
