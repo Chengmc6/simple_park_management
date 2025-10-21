@@ -1,0 +1,37 @@
+package com.example.park.controller;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.park.common.ApiResponse;
+import com.example.park.common.PageResult;
+import com.example.park.domain.dto.UsageRequestDTO;
+import com.example.park.domain.dto.UsageResponseVO;
+import com.example.park.domain.service.ICarUsageService;
+
+/**
+ * <p>
+ *  前端控制器
+ * </p>
+ *
+ * @author 高明(コウメイ)
+ * @since 2025-10-15
+ */
+@RestController
+@RequestMapping("/car-usage")
+public class CarUsageController {
+
+    @Autowired
+    private ICarUsageService usageService;
+
+    @PostMapping("/history")
+    public ApiResponse<PageResult<UsageResponseVO>> history(UsageRequestDTO dto){
+        PageResult<UsageResponseVO> result=usageService.history(dto);
+        return ApiResponse.success(result);
+    }
+}
+
