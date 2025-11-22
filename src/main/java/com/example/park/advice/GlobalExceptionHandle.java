@@ -19,6 +19,7 @@ public class GlobalExceptionHandle {
         return ApiResponse.error(ex.getCode(),ex.getMessage());
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     public ApiResponse<String> handleIllegalArgumentException(MethodArgumentNotValidException ex){
         String message = Optional.ofNullable(ex.getBindingResult().getFieldError())
                          .map(FieldError::getDefaultMessage)

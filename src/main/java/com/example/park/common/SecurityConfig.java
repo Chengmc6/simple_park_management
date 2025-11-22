@@ -1,5 +1,6 @@
 package com.example.park.common;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -9,12 +10,16 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.example.park.advice.ObjectFieldHandle;
 
 @Configuration
-public class SystemConfig {
+public class SecurityConfig {
+
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     //パスワード暗号化と検証
     @Bean
@@ -32,7 +37,7 @@ public class SystemConfig {
                 requestMatchers("/user/login","/user/register").permitAll()//ユーザーはログインページと新規ページがアクセスできるように設定する
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(null, null)
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)//ユーザー名とパスワードの認証前にJWTの検証をする
             .build();
     }
 
