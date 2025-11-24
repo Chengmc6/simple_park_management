@@ -1,81 +1,82 @@
 package com.example.park;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.baomidou.mybatisplus.core.toolkit.StringPool;
-import com.baomidou.mybatisplus.generator.AutoGenerator;
-import com.baomidou.mybatisplus.generator.InjectionConfig;
-import com.baomidou.mybatisplus.generator.config.*;
-import com.baomidou.mybatisplus.generator.config.po.TableInfo;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.generator.FastAutoGenerator;
+import com.baomidou.mybatisplus.generator.config.OutputFile;
+import com.baomidou.mybatisplus.generator.config.rules.DateType;
 import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
 
+import java.util.Collections;
+
+/**
+ * MyBatis-Plus 代码生成器 (适用于 3.5.x 及以上版本)
+ * 作者: 高明(コウメイ)
+ */
 public class CodeGenerator {
-     public static void main(String[] args) {
-        //代码生成器(code generator)
-        AutoGenerator mpg=new AutoGenerator();
 
-        //全局配置(global configuration)
-        GlobalConfig gc=new GlobalConfig();
-        String projectPath=System.getProperty("user.dir");
-        gc.setOutputDir(projectPath+"/src/main/java");
-        gc.setAuthor("高明(コウメイ)");
-        gc.setOpen(false);
-        mpg.setGlobalConfig(gc);
+    // 数据库连接配置
+    private static final String URL = "jdbc:mysql://localhost:3306/park_management?serverTimezone=UTC" +
+            "&characterEncoding=utf8&useUnicode=true&useSSL=false&allowPublicKeyRetrieval=true";
+    private static final String USERNAME = "root";
+    private static final String PASSWORD = "root";
 
-        //数据源配置(data source configuration)
-        DataSourceConfig dataSource=new DataSourceConfig();
-        dataSource.setUrl("jdbc:mysql://localhost:3306/park_management?serverTimezone=UTC" +
-                "&characterEncoding=utf8&useUnicode=true&useSSL=false&allowPublicKeyRetrieval=true");
-        dataSource.setDriverName("com.mysql.cj.jdbc.Driver");
-        dataSource.setUsername("root");
-        dataSource.setPassword("root");
-        mpg.setDataSource(dataSource);
+    // 项目路径和输出目录
+    private static final String PROJECT_PATH = System.getProperty("user.dir");
+    private static final String OUTPUT_DIR = PROJECT_PATH + "/src/main/java";
 
-        //包配置(package configuration)
-        PackageConfig pc=new PackageConfig();
+    public static void main(String[] args) {
+        FastAutoGenerator.create(URL, USERNAME, PASSWORD)
 
-        pc.setParent("com.example.park");
-        pc.setEntity("domain.entity");
-        pc.setMapper("domain.mapper");
-        pc.setService("domain.service");
-        pc.setServiceImpl("domain.service.impl");
-        pc.setController("controller");
-        mpg.setPackageInfo(pc);
+                // 全局配置 (GlobalConfig)
+                .globalConfig(builder -> {
+                    builder.author("高明(コウメイ)") // 设置作者
+                           .outputDir(OUTPUT_DIR) // 输出目录
+                           .dateType(DateType.TIME_PACK) // 使用 Java 8 时间类型
+                           .disableOpenDir(); // 生成后不自动打开目录
+                })
 
-        //自定义配置(user-defined configuration)
-        InjectionConfig ic=new InjectionConfig() {
-            @Override
-            public void initMap() {
+                // 包配置 (PackageConfig)
+                .packageConfig(builder -> {
+                    builder.parent("com.example.park") // 父包名
+                           .entity("domain.entity") // Entity 包
+                           .mapper("domain.mapper") // Mapper 包
+                           .service("domain.service") // Service 包
+                           .serviceImpl("domain.service.impl") // ServiceImpl 包
+                           .controller("controller") // Controller 包
+                           // 指定 XML 文件输出路径
+                           .pathInfo(Collections.singletonMap(OutputFile.xml, PROJECT_PATH + "/src/main/resources/mapper/"));
+                })
 
-            }
-        };
-        String templatePath="/templates/mapper.xml.vm";
-        List<FileOutConfig> focList=new ArrayList<>();
-        focList.add(new FileOutConfig(templatePath) {
-            @Override
-            public String outputFile(TableInfo tableInfo) {
-                return projectPath+"/src/main/resources/mapper/"+tableInfo.getEntityName()+"Mapper"+ StringPool.DOT_XML;
-            }
-        });
-        ic.setFileOutConfigList(focList);
-        mpg.setCfg(ic);
-        TemplateConfig config=new TemplateConfig();
-        config.setXml(null);//.setController("")
-        mpg.setTemplate(config);
-        //策略配置(strategy configuration)
-        StrategyConfig sc=new StrategyConfig();
-        sc.setNaming(NamingStrategy.underline_to_camel);
-        sc.setColumnNaming(NamingStrategy.underline_to_camel);
-        sc.setEntityLombokModel(true);
-        sc.setRestControllerStyle(true);
-        //公共父类(common parent class)
-        //写于父类中的公共字段(common fields in the parent class)
-        sc.setControllerMappingHyphenStyle(true);
-        sc.setTablePrefix(pc.getModuleName()+"_");
-        mpg.setStrategy(sc);
-        mpg.execute();
+                // 策略配置 (StrategyConfig)
+                .strategyConfig(builder -> {
+                    builder.addInclude("car", "user") // ⭐ 指定要生成的表 (示例: car, user)
+                           .addTablePrefix("t_", "sys_", "park_"); // 去掉表前缀
 
+                    // Entity 策略
+                    builder.entityBuilder()
+                           .naming(NamingStrategy.underline_to_camel) // 下划线转驼峰
+                           .columnNaming(NamingStrategy.underline_to_camel)
+                           .enableLombok() // 启用 Lombok
+                           .enableTableFieldAnnotation(); // 字段注解，方便查看数据库字段
+
+                    // Mapper 策略
+                    builder.mapperBuilder()
+                           .superClass(BaseMapper.class) // 继承 BaseMapper
+                           .enableBaseResultMap() // 启用 BaseResultMap
+                           .enableBaseColumnList(); // 启用 BaseColumnList
+
+                    // Controller 策略
+                    builder.controllerBuilder()
+                           .enableRestStyle() // 启用 @RestController 风格
+                           .enableHyphenStyle(); // URL 中驼峰转连字符
+
+                    // Service 策略
+                    builder.serviceBuilder()
+                           .formatServiceFileName("%sService") // Service 接口命名
+                           .formatServiceImplFileName("%sServiceImpl"); // Service 实现类命名
+                })
+
+                // 执行生成
+                .execute();
     }
-
 }
