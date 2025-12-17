@@ -53,7 +53,7 @@ public class UserController {
         return ApiResponse.success(responseDTO, "ログイン成功");
     }
     //ユーザーメッセージインターフェース
-    @GetMapping("/{userId}")
+    @GetMapping("/me")
     public ApiResponse<UserInfoDTO> info(@AuthenticationPrincipal CustomerUserDetails userDetails){
         Long userId=userDetails.getId();
         UserInfoDTO dto=iService.info(userId);

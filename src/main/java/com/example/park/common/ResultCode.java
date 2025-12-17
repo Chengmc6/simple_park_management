@@ -22,10 +22,11 @@ public enum ResultCode {
     USER_NOT_FOUND(1003,"ユーザーは存在しません"),
     PASSWORD_SAME(1004,"新しいパスワードと古いパスワードは同じではないでください"),
     ILLEGAL_PERMISSION(1005,"権限不足"),
-    NOT_AVAILABLE(1006,"車輌使用不可");
+    NOT_AVAILABLE(1006,"車輌使用不可"),
+    LOGIN_FAILED(1007,"ログイン失敗しました");
 
-    private Integer code;
-    private String message;
+    private final Integer code;
+    private final String message;
 
     ResultCode(Integer code, String message) {
         this.code = code;

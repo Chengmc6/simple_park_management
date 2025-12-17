@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -63,7 +64,16 @@ public class CarUsageServiceImpl extends ServiceImpl<CarUsageMapper, CarUsage> i
             .eq("car_id",dto.getCarId())// 按车辆 ID 筛选 ／ 車両IDで絞り込み
             .orderByDesc("ride_time")// 按乘车时间倒序 ／ 乗車時間で降順
         );
-
+        // 如果查询结果为空，直接返回空的分页结果
+        if (usagePage.getRecords().isEmpty()) {
+            return new PageResult<>(
+                    0L,
+                    usagePage.getCurrent(),
+                    usagePage.getSize(),
+                    usagePage.getPages(),
+                    Collections.emptyList()
+            );
+        }
         // 3. 提取所有使用记录中的用户 ID（去重）
         // 使用履歴からユーザーIDを抽出（重複排除）
         List<Long> ids=usagePage.getRecords().stream()
@@ -72,10 +82,18 @@ public class CarUsageServiceImpl extends ServiceImpl<CarUsageMapper, CarUsage> i
             .collect(Collectors.toList());
         
             //ユーザー名を抽出
-        Map<Long,String> userMap=userMapper.selectByIds(ids).stream()
-            .collect(Collectors.toMap(SimpleUserDTO::getId, SimpleUserDTO::getUsername));
+        final Map<Long,String> userMap;
+
+        if (!ids.isEmpty()) {
+            // 第一次也是唯一一次赋值：查询并映射数据
+            userMap = userMapper.selectByIds(ids).stream()
+                    .collect(Collectors.toMap(SimpleUserDTO::getId, SimpleUserDTO::getUsername));
+        } else {
+            // 确保在无用户ID时也进行赋值，使用空 Map
+            userMap = Collections.emptyMap();
+        }
         
-            // 4. 查询车辆信息（只查一次）
+        // 4. 查询车辆信息（只查一次）
         // 車両情報を一度だけ取得
         Car car=carMapper.selectById(dto.getCarId());
 

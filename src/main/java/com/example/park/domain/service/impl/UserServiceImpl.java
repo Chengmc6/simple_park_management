@@ -5,13 +5,13 @@ import com.example.park.common.CustomerUserDetails;
 import com.example.park.common.JwtUtils;
 import com.example.park.common.ResultCode;
 import com.example.park.common.SystemException;
+import com.example.park.domain.converter.StructMapper;
 import com.example.park.domain.dto.UserInfoDTO;
 import com.example.park.domain.dto.UserLoginRequestDTO;
 import com.example.park.domain.dto.UserLoginResponseDTO;
 import com.example.park.domain.dto.UserPasswordChangeDTO;
 import com.example.park.domain.dto.UserRegisterDTO;
 import com.example.park.domain.entity.User;
-import com.example.park.domain.mapper.StructMapper;
 import com.example.park.domain.mapper.UserMapper;
 import com.example.park.domain.service.IUserService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -48,7 +48,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     public void register(UserRegisterDTO dto) {
 
         if(dto==null){
-            throw new SystemException(ResultCode.SERVER_ERROR);
+            throw new SystemException(ResultCode.BAD_REQUEST);
         }
 
         QueryWrapper<User> wrapper=new QueryWrapper<>();
@@ -71,7 +71,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     public UserLoginResponseDTO login(UserLoginRequestDTO dto) {
 
         if(dto==null){
-            throw new SystemException(ResultCode.SERVER_ERROR);
+            throw new SystemException(ResultCode.BAD_REQUEST);
+        }
+        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        wrapper.eq("username", dto.getUsername());
+        User user = userMapper.selectOne(wrapper);
+
+        // 2. 校验用户是否存在或是否被禁用
+        if (user == null || user.getIsDeleted()) {
+            // 使用通用的 LOGIN_FAILED 错误，避免向攻击者暴露是用户名还是密码错误
+            throw new SystemException(ResultCode.LOGIN_FAILED);
+        }
+
+        // 3. 核心校验：使用 passwordEncoder 匹配明文密码和数据库中的哈希密码
+        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+            throw new SystemException(ResultCode.LOGIN_FAILED);
         }
         //ユーザーデータの認証
         CustomerUserDetails userDetails=authenticationService.authenticateUser(dto.getUsername(), dto.getPassword());
@@ -94,7 +108,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public void changePassword(Long userId,UserPasswordChangeDTO dto) {
         if (dto==null || userId==null) {
-            throw new SystemException(ResultCode.SERVER_ERROR);
+            throw new SystemException(ResultCode.BAD_REQUEST);
         }
 
         User user=userMapper.selectById(userId);

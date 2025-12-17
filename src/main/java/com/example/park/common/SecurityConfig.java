@@ -8,9 +8,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -34,11 +36,24 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * 🌟 关键新增：定义 DaoAuthenticationProvider Bean，确保它使用正确的 UserDetailsService 和 PasswordEncoder。
+     * 这可以保证认证服务(login)和用户服务(changePassword)中注入的 PasswordEncoder 是同一个。
+     */
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder);
+        return authProvider;
+    }
+
     //ユーザーログイン検証規則を設定する
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         return http
             .csrf(csrf -> csrf.disable())//JWTには、cookieが必要ではないので、CSRF保護は禁じることができる
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))// 2. 🌟 显式启用 CORS 配置 (将使用 corsConfigurationSource Bean)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))//JWTつかうので、sessionも必要ではない
             .authorizeHttpRequests(auth -> auth
                 // 🌟 解决 CORS 核心问题：允许所有 OPTIONS 请求通过
