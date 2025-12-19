@@ -1,5 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.park.domain.mapper.CarUsageMapper">
+    <resultMap id="UsageWithUserMap" type="com.example.park.domain.dto.UsageResponseVO">
+        <result column="car_number" property="carNumber"/>
+        <result column="username" property="username"/>
+        <result column="ride_time" property="rideTime"/>
+        <result column="ride_alcohol_level" property="rideAlcoholLevel"/>
+        <result column="drop_time" property="dropTime"/>
+        <result column="drop_alcohol_level" property="dropAlcoholLevel"/>
+    </resultMap>
 
+    <!-- 注意：不要写 LIMIT，分页插件会自动加 -->
+    <select id="selectUsageWithUser" resultMap="UsageWithUserMap" parameterType="map">
+        SELECT
+            cu.id,
+            cu.car_id,
+            cu.user_id,
+            cu.ride_time,
+            cu.ride_alcohol_level,
+            cu.drop_time,
+            cu.drop_alcohol_level,
+            u.username,
+            c.car_number
+        FROM car_usage cu
+                 LEFT JOIN user u ON cu.user_id = u.id
+                 LEFT JOIN car c ON cu.car_id = c.id
+        WHERE cu.car_id = #{carId}
+        ORDER BY cu.ride_time DESC
+    </select>
 </mapper>
