@@ -197,10 +197,9 @@ mvn spring-boot:run
 
 | メソッド | エンドポイント | 説明 |
 |---------|-------------|------|
-| POST | `/park/user/register` | ユーザー登録 |
+| POST | `/park/user` | ユーザー登録 |
 | POST | `/park/user/login` | ユーザーログイン |
 | GET | `/park/user/info` | ログインユーザー情報取得 |
-| PUT | `/park/user/info` | ユーザー情報更新 |
 | POST | `/park/user/password-change` | パスワード変更 |
 
 ### 車両関連 API
@@ -208,19 +207,17 @@ mvn spring-boot:run
 | メソッド | エンドポイント | 説明 |
 |---------|-------------|------|
 | POST | `/park/car/add` | 車両登録 |
-| GET | `/park/car/list` | 車両一覧取得（ページング対応） |
-| GET | `/park/car/{id}` | 車両詳細取得 |
+| GET | `/park/car/query` | 車両一覧取得（ページング対応） |
 | PUT | `/park/car/update` | 車両情報更新 |
-| DELETE | `/park/car/delete` | 車両削除 |
+| POST | `/park/car/delete` | 車両削除 |
 
-### 利用履歴関連 API
+### 利用関連 API
 
 | メソッド | エンドポイント | 説明 |
 |---------|-------------|------|
-| POST | `/park/usage/ride` | 乗車開始 |
-| POST | `/park/usage/drop` | 降車処理 |
-| GET | `/park/usage/list` | 利用履歴一覧取得 |
-| GET | `/park/usage/{id}` | 利用履歴詳細取得 |
+| POST | `/park/car/ride` | 乗車開始 |
+| POST | `/park/car/drop` | 降車処理 |
+| GET | `/park/car-usage/history` | 利用履歴一覧取得 |
 
 ## フロントエンドとの連携
 
@@ -237,7 +234,7 @@ API へアクセスします。
 ### 1. ユーザー登録
 
 ```bash
-curl -X POST http://localhost:8080/park/user/register \
+curl -X POST http://localhost:8080/park/user \
   -H "Content-Type: application/json" \
   -d '{
     "username": "taro",
@@ -272,7 +269,7 @@ curl -X POST http://localhost:8080/park/car/add \
 ### 4. 乗車開始
 
 ```bash
-curl -X POST http://localhost:8080/park/usage/ride \
+curl -X POST http://localhost:8080/park/car/ride \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer {token}" \
   -d '{
@@ -284,7 +281,7 @@ curl -X POST http://localhost:8080/park/usage/ride \
 ### 5. 車両一覧取得
 
 ```bash
-curl -X GET "http://localhost:8080/park/car/list?pageNum=1&pageSize=10" \
+curl -X GET "http://localhost:8080/park/car/query?pageNum=1&pageSize=10" \
   -H "Authorization: Bearer {token}"
 ```
 
