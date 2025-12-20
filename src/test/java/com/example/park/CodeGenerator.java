@@ -49,7 +49,7 @@ public class CodeGenerator {
 
                 // 策略配置 (StrategyConfig)
                 .strategyConfig(builder -> {
-                    builder.addInclude("car", "user") // ⭐ 指定要生成的表 (示例: car, user)
+                    builder.addInclude("car", "user","car_usage") // ⭐ 指定要生成的表 (示例: car, user)
                            .addTablePrefix("t_", "sys_", "park_"); // 去掉表前缀
 
                     // Entity 策略
